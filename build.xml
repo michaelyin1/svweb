@@ -1,0 +1,100 @@
+<project name="Selenium" default="usage" basedir=".">
+    <property environment="env"/> 
+  <property name="ws.home" value="${basedir}"/>
+  <property name="ws.build" value="${basedir}"/>
+  <property name="ws.jar" value="/Users/michael/Ant/Jar"/>
+  <property name="test.dest" value="${ws.build}/Build"/> 
+  <property name="test.src" value="${ws.build}/src"/> 
+  <property name="test.report" value="/Users/michael/Ant/rep"/>
+   <path id="testcase.path">
+<pathelement location="${test.dest}"/>
+<fileset dir="${ws.jar}">
+<include name="*.jar"/>
+</fileset>
+</path>
+<path id="test.classpath">
+<pathelement location="${ws.jar}"/>
+</path>
+   <target name="setClassPath" unless="test.classpath">
+    <path id="classpath_jars">
+    <fileset dir="${ws.jar}" includes="*.jar*"/>
+    </path>
+<pathconvert pathsep=":"
+property="test.classpath"
+refid="classpath_jars"/>
+</target>
+<target name="init" depends="setClassPath">
+<tstamp>
+<format property ="start.time" pattern="MM/dd/yyyy hh:mm:aa"/>
+</tstamp>
+<condition property ="ANT"
+value="${env.ANT_HOME}/bin/ant.bat"
+else="${env.ANT_HOME}/bin/ant">
+<os family="windows" />
+</condition>
+<!-- <taskdef name="testng" classpath="${test.classpath}" classname="org.testng.TestNGAntTask" /> -->
+</target>
+
+<target name="all">
+</target>
+  <target name="clean">
+    <delete dir="${test.dest}"/>
+    </target>
+
+  <target name="compile" depends="init, clean">
+<delete includeemptydirs="true" quiet="true">
+<fileset dir="${test.dest}" includes="**/*"/>
+</delete>
+<echo message="making directory..."/>
+   <mkdir dir="${test.dest}"/>
+<echo message="classpath---------:${test.classpath}"/>
+<echo message="compiling......."/>
+<javac
+debug="true"
+destdir="${test.dest}"
+srcdir="${test.src}"
+target="1.8"
+classpath="${test.classpath}"
+>
+</javac>
+ </target>
+<target name="build" depends="init">
+</target>
+<target name="usage">
+<echo>
+ant run exceute
+</echo>
+</target>
+<path id="test.c">
+<fileset dir="${ws.jar}" includes="*.jar"/>
+</path>
+  <target name="run" >
+   <delete includeemptydirs="true" quiet="true">
+   <fileset dir="${test.report}" includes="**/*"/>
+   </delete>
+   <java jar ="${ws.jar}" fork="true" spawn="true"/>
+   <junit fork="yes" haltonfailure="no" printsummary="yes">
+   <classpath refid="testcase.path" />
+   <batchtest todir ="${test.report}" fork="true">
+   <fileset dir="${test.dest}">
+   <!-- <include name="**/DevPortal.class"/> -->
+   <!-- <include name="**/JavaSeleniumTestSuiteRunner.class"/> -->
+   <include name="**/TestHomePage.class"/> 
+   <include name="**/TestLoginPage.class"/>
+   <include name="**/TestSignUp.class"/>
+   <include name="**/TestUser_Game.class"/>
+   <include name="**/Manage_Profile.class"/>
+   </fileset> 
+   </batchtest>
+   <formatter type="xml"/>
+      <classpath refid="testcase.path"/>
+   </junit> 
+   <junitreport todir="${test.report}">
+   <fileset dir="${test.report}">
+   <include name="**.xml"/> 
+   </fileset> 
+   <report todir="${test.report}"/>
+   </junitreport>
+      </target>
+
+</project>
